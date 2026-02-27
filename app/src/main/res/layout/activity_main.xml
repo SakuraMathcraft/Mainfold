@@ -1,164 +1,238 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    tools:context=".MainActivity">
 
-    <!-- 地图区域 -->
+    <!-- Map Area -->
     <com.amap.api.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-    <!-- 可拉动底部操作栏 -->
-    <androidx.cardview.widget.CardView
+    <!-- BottomSheet：外层透明，仅用于行为；内层圆角容器，支持纵向滚动 -->
+    <FrameLayout
         android:id="@+id/cardView"
+        style="?attr/bottomSheetStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
+        android:background="@android:color/transparent"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <ScrollView
+            android:id="@+id/bottomScroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
 
+            <!-- 内层圆角卡片，居中且不占满宽度 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:paddingHorizontal="24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="24dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_dialog_round"
+                android:elevation="8dp">
 
-                <!-- 灰色小手柄 -->
-                <View
-                    android:id="@+id/dragHandle"
-                    android:layout_width="match_parent"
-                    android:layout_height="4dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/drag_handle_bg"
-                    />
+            <!-- Drag Handle indicator -->
+            <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
-                <!-- 步长输入 -->
-                <EditText
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/deviceInfoText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                tools:text="Device Info" />
+
+            <!-- Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/stepInputLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="请输入步长 (米), 建议1-3">
+
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/stepInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="请输入步长（单位：米）建议1-3区间"
-                    android:inputType="numberDecimal"
-                    android:padding="10dp"
-                    android:layout_marginBottom="12dp" />
+                    android:inputType="numberDecimal" />
 
-                <!-- 基本操作按钮 -->
-                <Button
-                    android:id="@+id/startBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="开始记录坐标(GPS）"
-                    android:backgroundTint="#7B1FA2"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <Button
-                    android:id="@+id/stopBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="结束记录并计算面积/周长"
-                    android:backgroundTint="#512DA8"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+            <!-- Buttons -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_lejian"
+                style="@style/Widget.MyApp.PrimaryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="刷乐健里程"
+                app:icon="@drawable/ic_legym"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
 
-                <!-- 其余功能按钮 -->
-                <Button
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/startBtn"
+                style="@style/Widget.MyApp.PrimaryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="开始记录坐标"
+                app:icon="@drawable/ic_record_start"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/stopBtn"
+                style="@style/Widget.MyApp.PrimaryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="结束记录并计算"
+                app:icon="@drawable/ic_record_stop"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/zoomBtn"
-                    android:layout_width="match_parent"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="定位到当前位置"
-                    android:backgroundTint="#303F9F"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginEnd="8dp"
+                    android:text="定位"
+                    app:icon="@drawable/ic_zoom"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/replayBtn"
-                    android:layout_width="match_parent"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="回放轨迹"
-                    android:backgroundTint="#009688"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+                    android:text="回放"
+                    app:icon="@drawable/ic_replay"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp" />
+            </LinearLayout>
 
-                <Button
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/layerBtn"
-                    android:layout_width="match_parent"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="切换图层"
-                    android:backgroundTint="#455A64"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginEnd="8dp"
+                    android:text="图层"
+                    app:icon="@drawable/ic_layers"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    tools:ignore="MissingPrefix" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/themeBtn"
-                    android:layout_width="match_parent"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="切换主题"
-                    android:backgroundTint="#607D8B"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+                    android:text="主题"
+                    app:icon="@drawable/ic_theme"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    tools:ignore="MissingPrefix" />
 
-                <Button
-                    android:id="@+id/statsBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="查看数据统计"
-                    android:backgroundTint="#009688"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+            </LinearLayout>
 
-                <!-- 显示结果 -->
-                <TextView
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/statsBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="查看数据统计" />
+
+            <!-- Results：使用紧凑容器包裹统计信息 -->
+            <LinearLayout
+                android:id="@+id/summaryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_light_blue"
+                android:padding="12dp">
+
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/areaResult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="面积结果将在此显示"
-                    android:textSize="16sp"
-                    android:textColor="#000000"
                     android:gravity="center"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:layout_marginBottom="2dp"
+                    tools:text="面积：0㎡ · 周长：0m" />
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/timeResult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="时间信息将在此显示"
-                    android:textSize="14sp"
-                    android:textColor="#000000"
                     android:gravity="center"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp" />
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:layout_marginBottom="2dp"
+                    tools:text="开始 / 结束 / 用时" />
 
-                <TextView
-                    android:id="@+id/stepCountText"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="步数将在此显示"
-                    android:textSize="14sp"
-                    android:textColor="#000000"
-                    android:gravity="center"
-                    android:paddingBottom="8dp" />
-                <TextView
-                    android:id="@+id/realStepCountText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="真实步数将在此显示"
-                    android:textSize="14sp"
-                    android:textColor="#000000"
-                    android:gravity="center"
-                    android:paddingBottom="8dp"/>
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/stepCountText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginEnd="8dp"
+                        tools:text="步长数：0" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/realStepCountText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        tools:text="真实步数：0" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </ScrollView>
-    </androidx.cardview.widget.CardView>
-
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_round"
+    android:padding="20dp">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_accounts_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="选择乐健账号"
+        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:textColor="@color/primary_blue"
+        android:layout_marginBottom="12dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+        <LinearLayout
+            android:id="@+id/accountsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_clear_accounts"
+        app:backgroundTint="@color/primary_blue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:text="清空账号" />
+
+</LinearLayout>
+

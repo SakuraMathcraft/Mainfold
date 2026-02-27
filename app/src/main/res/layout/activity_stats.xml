@@ -1,61 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="16dp"
+    tools:context=".StatsActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <!-- 仅内容区滚动；底部按钮固定 -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:divider="?android:attr/dividerHorizontal"
-        android:showDividers="middle">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/statsText"
+        <ScrollView
+            android:id="@+id/scrollContent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="统计数据"
-            android:textSize="18sp"
-            android:textColor="#000000"
-            android:paddingBottom="16dp" />
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/realStepText"
+            <LinearLayout
+                android:id="@+id/cardsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="12dp" />
+        </ScrollView>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/emptyText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="真实步数统计"
-            android:textSize="16sp"
-            android:textColor="#333333"
-            android:paddingTop="8dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="暂无历史数据"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:visibility="gone" />
 
-        <Button
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/bottomActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_dialog_round"
+        android:padding="12dp">
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/exportBtn"
+            style="@style/Widget.MyApp.PrimaryButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="📤 一键导出所有轨迹"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF" />
+            android:text="导出所有轨迹"
+            app:icon="@drawable/ic_export"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/clearBtn"
+            style="@style/Widget.MyApp.PrimaryButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🧹 清除历史记录"
-            android:backgroundTint="#FF5252"
-            android:textColor="#FFFFFF" />
+            android:layout_marginTop="8dp"
+            android:text="清除历史记录"
+            app:icon="@drawable/ic_delete"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
-        <!-- 用于动态添加导出按钮 -->
-        <LinearLayout
-            android:id="@+id/exportListLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="12dp"
-            android:divider="?android:attr/dividerHorizontal"
-            android:showDividers="middle" />
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>

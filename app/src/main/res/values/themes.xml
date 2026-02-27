@@ -1,9 +1,31 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+  <!--
+  ============================================
+  Base application theme for the entire app.
+  ============================================
+  -->
+  <style name="Theme.Manifold" parent="Theme.Material3.DayNight.NoActionBar">
 
-    <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+    <!-- 1. Primary brand color. -->
+    <!-- This is used for the color of buttons, active form fields, etc. -->
+    <item name="colorPrimary">@color/primary_blue</item>
+    <item name="colorOnPrimary">@color/white</item>
+
+    <!-- 2. Primary container color. -->
+    <!-- This is used for large surfaces that need to stand out. -->
+    <item name="colorPrimaryContainer">@color/primary_blue</item>
+    <item name="colorOnPrimaryContainer">@color/white</item>
+
+    <!-- 3. Secondary brand color. -->
+    <!-- You can define a secondary color if needed, for things like FABs. -->
+    <!-- <item name="colorSecondary">@color/my_secondary</item> -->
+    <!-- <item name="colorOnSecondary">@color/white</item> -->
+
+    <!-- 4. Status bar color. -->
+    <item name="android:statusBarColor">?attr/colorPrimary</item>
+
+    <!-- You can add other customizations here. -->
+
+  </style>
+
 </resources>

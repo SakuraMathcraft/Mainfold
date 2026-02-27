@@ -3,25 +3,32 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myapplication"
+    namespace = "com.tensorhub.manifold"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.tensorhub.manifold"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
 
+        // ✅ 注入 Manifest 占位符
+        val amapApiKey: String? = project.findProperty("amap.api.key") as String?
+        manifestPlaceholders["AMAP_API_KEY"] = amapApiKey ?: "PLEASE_SET_YOUR_OWN_KEY"
+        ndk {
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
+                "proguard-amap.pro"
             )
         }
     }
@@ -32,14 +39,15 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true // 如果你使用 ViewBinding，可保留
+        viewBinding = true
     }
 }
 
 dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
     // ✅ 高德地图 SDK
     implementation("com.amap.api:3dmap:9.8.3")
-
     // ✅ Google 官方库
     implementation(libs.appcompat)
     implementation(libs.material)
