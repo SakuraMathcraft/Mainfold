@@ -1,5 +1,6 @@
 # GPS Tracking and Area calculation APP
-![Logo](Screenshot_2025-10-01-17-14-07-85_ee015900260ab50.jpg)
+![Screenshot_2026-02-27-19-15-16-36_fe67bfd226f2707](https://github.com/user-attachments/assets/71b24f90-6fc9-453a-b73c-1dc76357fa93)
+
 This Android application is designed to **track the user's location** using **GPS** and **step count** via a built-in step counter sensor. It visualizes the trajectory on a map, provides real-time step count updates, calculates the area and perimeter of the traveled path, and stores the user's tracking data for future reference.
 
 ## Features
