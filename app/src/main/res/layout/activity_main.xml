@@ -56,182 +56,253 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="16dp"
                 tools:text="Device Info" />
+                <!-- Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/stepInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="请输入步长 (米), 建议1-3">
 
-            <!-- Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/stepInputLayout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="请输入步长 (米), 建议1-3">
-
-                <com.google.android.material.textfield.TextInputEditText
+    <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/stepInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Buttons -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_lejian"
-                style="@style/Widget.MyApp.PrimaryButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="刷乐健里程"
-                app:icon="@drawable/ic_legym"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/startBtn"
-                style="@style/Widget.MyApp.PrimaryButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="开始记录坐标"
-                app:icon="@drawable/ic_record_start"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/stopBtn"
-                style="@style/Widget.MyApp.PrimaryButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="结束记录并计算"
-                app:icon="@drawable/ic_record_stop"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
-
+                <!-- Buttons -->
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/zoomBtn"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:id="@+id/btn_lejian"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="定位"
-                    app:icon="@drawable/ic_zoom"
+                    android:layout_marginBottom="1dp"
+                    android:text="刷乐健里程"
+                    app:icon="@drawable/ic_legym"
                     app:iconGravity="textStart"
                     app:iconPadding="8dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/replayBtn"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:id="@+id/startBtn"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="回放"
-                    app:icon="@drawable/ic_replay"
+                    android:layout_marginBottom="1dp"
+                    android:text="开始记录坐标"
+                    app:icon="@drawable/ic_record_start"
                     app:iconGravity="textStart"
                     app:iconPadding="8dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/layerBtn"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="图层"
-                    app:icon="@drawable/ic_layers"
-                    app:iconGravity="textStart"
-                    app:iconPadding="8dp"
-                    tools:ignore="MissingPrefix" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/themeBtn"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="主题"
-                    app:icon="@drawable/ic_theme"
-                    app:iconGravity="textStart"
-                    app:iconPadding="8dp"
-                    tools:ignore="MissingPrefix" />
-
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/statsBtn"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="查看数据统计" />
-
-            <!-- Results：使用紧凑容器包裹统计信息 -->
-            <LinearLayout
-                android:id="@+id/summaryContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_card_light_blue"
-                android:padding="12dp">
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/areaResult"
+                    android:id="@+id/stopBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:layout_marginBottom="2dp"
-                    tools:text="面积：0㎡ · 周长：0m" />
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/timeResult"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:layout_marginBottom="2dp"
-                    tools:text="开始 / 结束 / 用时" />
+                    android:layout_marginBottom="1dp"
+                    android:text="结束记录并计算"
+                    app:icon="@drawable/ic_record_stop"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center">
+                    android:layout_marginBottom="1dp">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/stepCountText"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/zoomBtn"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:layout_marginEnd="8dp"
-                        tools:text="步长数：0" />
+                        android:layout_marginEnd="2dp"
+                        android:text="定位"
+                        app:icon="@drawable/ic_zoom"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp" />
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/realStepCountText"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/replayBtn"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        tools:text="真实步数：0" />
+                        android:text="回放"
+                        app:icon="@drawable/ic_replay"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="1dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/layerBtn"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="2dp"
+                        android:text="图层"
+                        app:icon="@drawable/ic_layers"
+                        app:iconGravity="textStart"
+                        app:iconPadding="1dp"
+                        tools:ignore="MissingPrefix" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/themeBtn"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="主题"
+                        app:icon="@drawable/ic_theme"
+                        app:iconGravity="textStart"
+                        app:iconPadding="1dp"
+                        tools:ignore="MissingPrefix" />
+
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/statsBtn"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="查看数据统计" />
+
+                <!-- Results：使用紧凑容器包裹统计信息 (兼容旧ID的新版紧凑布局) -->
+                <LinearLayout
+                    android:id="@+id/summaryContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card_light_blue"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <!-- ... summaryContainer 内部的所有内容都保持不变 ... -->
+                    <!-- ... (省略内部细节) ... -->
+                    <!-- 第一行: 面积 和 周长 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="面积 · 周长"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/areaResult"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="0.0 m² · 0.0 m"
+                                android:textAppearance="?attr/textAppearanceTitleMedium"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- 第二行: 开始/结束/用时 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="开始 / 结束 / 用时"
+                                android:textAppearance="?attr/textAppearanceLabelSmall" />
+
+                            <TextView
+                                android:id="@+id/timeResult"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="18:30 / 18:35 / 5m"
+                                android:textAppearance="?attr/textAppearanceBodyMedium" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- 第三行: 计步数 和 真实步数 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- 计步数 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="计步数 (系统)"
+                                android:textAppearance="?attr/textAppearanceLabelSmall" />
+
+                            <TextView
+                                android:id="@+id/stepCountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="0"
+                                android:textAppearance="?attr/textAppearanceBodyMedium" />
+                        </LinearLayout>
+
+                        <!-- 真实步数 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="真实步数"
+                                android:textAppearance="?attr/textAppearanceLabelSmall" />
+
+                            <TextView
+                                android:id="@+id/realStepCountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="0"
+                                android:textAppearance="?attr/textAppearanceBodyMedium" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+
             </LinearLayout>
         </ScrollView>
     </FrameLayout>

@@ -19,7 +19,7 @@ android {
         val amapApiKey: String? = project.findProperty("amap.api.key") as String?
         manifestPlaceholders["AMAP_API_KEY"] = amapApiKey ?: "PLEASE_SET_YOUR_OWN_KEY"
         ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.addAll(listOf("arm64-v8a"))
         }
     }
     buildTypes {
@@ -45,7 +45,6 @@ android {
 
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation ("androidx.appcompat:appcompat:1.6.1")
     // ✅ 高德地图 SDK
     implementation("com.amap.api:3dmap:9.8.3")
     // ✅ Google 官方库

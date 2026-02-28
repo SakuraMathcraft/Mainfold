@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 蓝色圆角主按钮样式 -->
-    <style name="Widget.MyApp.PrimaryButton" parent="Widget.Material3.Button">
-        <item name="android:backgroundTint">@color/primary_blue</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="iconTint">@android:color/white</item>
-        <item name="cornerRadius">22dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-    </style>
-
 </resources>
-

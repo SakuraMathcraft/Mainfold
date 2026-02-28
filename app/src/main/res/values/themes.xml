@@ -1,31 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
   <!--
   ============================================
   Base application theme for the entire app.
-  ============================================
-  -->
+
+    ============================================
+    -->
   <style name="Theme.Manifold" parent="Theme.Material3.DayNight.NoActionBar">
 
-    <!-- 1. Primary brand color. -->
-    <!-- This is used for the color of buttons, active form fields, etc. -->
-    <item name="colorPrimary">@color/primary_blue</item>
+    <!-- 1. 品牌颜色配置 -->
+    <item name="colorPrimary">@color/primary_blue
+    </item>
     <item name="colorOnPrimary">@color/white</item>
+    <item name="colorPrimaryContainer">@color/primary_blue</item><item name="colorOnPrimaryContainer">@color/white</item>
 
-    <!-- 2. Primary container color. -->
-    <!-- This is used for large surfaces that need to stand out. -->
-    <item name="colorPrimaryContainer">@color/primary_blue</item>
-    <item name="colorOnPrimaryContainer">@color/white</item>
-
-    <!-- 3. Secondary brand color. -->
-    <!-- You can define a secondary color if needed, for things like FABs. -->
-    <!-- <item name="colorSecondary">@color/my_secondary</item> -->
-    <!-- <item name="colorOnSecondary">@color/white</item> -->
-
-    <!-- 4. Status bar color. -->
+    <!-- 2.
+ 状态栏颜色 -->
     <item name="android:statusBarColor">?attr/colorPrimary</item>
 
-    <!-- You can add other customizations here. -->
+    <!-- 3. 【关键】为整个App设置默认的按钮样式 -->
+    <item name="materialButtonStyle">@style/Widget.MyApp.PrimaryButton</item>
+    <item name
+        ="materialButtonOutlinedStyle">@style/Widget.MyApp.OutlinedButton</item>
 
   </style>
 
+  <!--
+  ============================================
+  ==      自定义组件样式 (Component Styles)      ==
+  ============================================
+  -->
+
+  <!-- 1. 自定义主要按钮 (实心按钮) -->
+
+  <style name="Widget.MyApp.PrimaryButton" parent="Widget.Material3.Button">
+    <!-- 统一的圆角半径 -->
+    <item name="cornerRadius">24dp</item>
+
+    <!-- 移除固定高度，改用内边距来控制按钮的“胖瘦” -->
+    <!-- <item name="android:layout_height
+">52dp</item> -->        <item name="android:paddingTop">14dp</item>
+    <item name="android:paddingBottom">14dp</item>
+
+    <!-- 统一字体 -->
+    <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+    <item name="android:textStyle">bold</item>
+  </style>
+
+  <!-- 2. 自定义次要按钮 (描边按钮) -->
+  <style name="Widget.MyApp.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
+    <!-- 使用和主按钮完全一样的圆角半径 -->
+    <item name
+        ="cornerRadius">24dp</item>
+
+    <!-- 同样移除固定高度，使用内边距 -->
+    <!-- <item name="android:layout_height">52dp</item> -->
+    <item name="android:paddingTop">14dp</item>
+    <item name="android:paddingBottom">14dp</item>
+
+    <!-- 统一字体 -->
+    <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+  </style>
+
 </resources>
+

@@ -1,5 +1,6 @@
 package com.tensorhub.manifold;
 
+import static com.amap.api.maps.AMapUtils.calculateArea;
 import static com.amap.api.maps.model.BitmapDescriptorFactory.getContext;
 
 import android.Manifest;
@@ -189,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
     private float minDistance = 2.0f;
     private int stepCounter = 0;
     private MaterialTextView realStepCountTextView;
+    private LinearLayout summaryContainer;
     private TextInputEditText stepInput; // 配合 XML 中的 TextInputLayout 使用
     private MaterialTextView areaTextView, timeTextView, stepCountTextView;
     private boolean isDarkTheme = false;
@@ -364,6 +366,7 @@ public class MainActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.timeResult);
         stepCountTextView = findViewById(R.id.stepCountText);
         realStepCountTextView = findViewById(R.id.realStepCountText);
+        summaryContainer = findViewById(R.id.summaryContainer);
 
         // Location and Map settings
         MyLocationStyle myLocationStyle = new MyLocationStyle();
@@ -377,7 +380,9 @@ public class MainActivity extends AppCompatActivity {
         // Bottom sheet behavior
         View bottomSheet = findViewById(R.id.cardView);
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        bottomSheetBehavior.setPeekHeight(780);
+        int peekHeightInDp = 218;
+        int peekHeightInPx = (int) (peekHeightInDp * getResources().getDisplayMetrics().density);
+        bottomSheetBehavior.setPeekHeight(peekHeightInPx);
         bottomSheetBehavior.setHideable(false);
 
         // Start button click listener
@@ -416,24 +421,28 @@ public class MainActivity extends AppCompatActivity {
         // Stop button click listener
         findViewById(R.id.stopBtn).setOnClickListener(v -> {
             if (startTimeMillis == 0) {
-                showMessage("请先点击“开始记录坐标(GPS)”再结束记录");
+                showMessage("请先点击“开始记录坐标”再结束记录");
                 return;
             }
             endTimeMillis = System.currentTimeMillis();
             stopLocationUpdates();
             drawClosedPolygon();
-
             double area = calculateArea(pointList);
             double perimeter = calculatePerimeter(pointList);
             String duration = getDuration();
 
-            areaTextView.setText(String.format("面积：%.2f㎡\n周长：%.2fm", area, perimeter));
-            timeTextView.setText(String.format("开始：%s\n结束：%s\n用时：%s",
+            areaTextView.setText(String.format(java.util.Locale.US, "%.2f m² · %.2f m", area, perimeter));
+
+            timeTextView.setText(String.format("%s / %s / %s",
                     formatTime(startTimeMillis), formatTime(endTimeMillis), duration));
 
-            stepCountTextView.setText("步长数：" + stepCounter);
-            runOnUiThread(() -> realStepCountTextView.setText("真实步数：" + realSteps));
+            stepCountTextView.setText(String.valueOf(stepCounter));
+            runOnUiThread(() -> realStepCountTextView.setText(String.valueOf(realSteps)));
+
             saveToHistory(area, perimeter, stepCounter);
+
+            // 显示统计信息容器
+            summaryContainer.setVisibility(View.VISIBLE);
 
             if (pointList.size() >= 3) {
                 double gap = euclideanDistance(pointList.get(0), pointList.get(pointList.size() - 1));
@@ -450,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
                 aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastLatLng, 18));
                 showMessage("已定位到当前位置");
             } else {
-                showMessage("尚未获取定位，请先点击“开始记录坐标(GPS)”并允许使用确切的位置信息");
+                showMessage("尚未获取定位，请先点击“开始记录坐标”并允许使用确切的位置信息");
             }
         });
 
@@ -710,9 +719,16 @@ public class MainActivity extends AppCompatActivity {
                             accountsMap.remove(phone);
 
                             StringBuilder sb = new StringBuilder();
+                            int i = 0;
                             for (java.util.Map.Entry<String, String> acc : accountsMap.entrySet()) {
-                                sb.append(acc.getKey()).append(":").append(acc.getValue()).append("\n");
+                                if (i > 0) {
+                                    // 只有在不是第一个元素的时候，才在前面加上换行符
+                                    sb.append("\n");
+                                }
+                                sb.append(acc.getKey()).append(":").append(acc.getValue());
+                                i++;
                             }
+
                             sp.edit().putString("accounts", sb.toString()).apply();
 
                             container.removeView(card);
