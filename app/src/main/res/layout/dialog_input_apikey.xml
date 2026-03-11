@@ -18,7 +18,7 @@
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="此Key仅用于地图显示，不影响乐健功能。申请方法请参照项目 Readme。"
+        android:text="此Key仅用于地图显示，不影响乐健功能"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textColor="?attr/colorOnSurfaceVariant"
         android:layout_marginBottom="16dp" />

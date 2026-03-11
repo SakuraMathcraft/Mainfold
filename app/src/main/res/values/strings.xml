@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Manifold</string>
+    <string name="device_info_format">设备：%1$s · Android %2$s</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.tensorhub.manifold;
 
-import static com.amap.api.maps.AMapUtils.calculateArea;
 import static com.amap.api.maps.model.BitmapDescriptorFactory.getContext;
 
 import android.Manifest;
@@ -24,9 +23,7 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.Gravity;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -39,12 +36,9 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -56,12 +50,9 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.PolygonOptions;
 import com.amap.api.maps.model.PolylineOptions;
-import com.tensorhub.manifold.StatsActivity;
-import com.tensorhub.manifold.TrackingService;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textview.MaterialTextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private String id = "8a978069962e2b9601964c84daf01408";
     private String schoolId = "402881ea7c39c5d5017c39d134c30395";
     private String semesterId = "8a97806a9505a31d0195276933f70506";
+
     private static final Map<String, String> fieldMap = new HashMap<String, String>() {{
         put("avePace", "ap");
         put("limitationsGoalsSexInfoId", "lid");
@@ -189,10 +181,10 @@ public class MainActivity extends AppCompatActivity {
     private LatLng lastLatLng = null;
     private float minDistance = 2.0f;
     private int stepCounter = 0;
-    private MaterialTextView realStepCountTextView;
+    private TextView realStepCountTextView;
     private LinearLayout summaryContainer;
     private TextInputEditText stepInput; // 配合 XML 中的 TextInputLayout 使用
-    private MaterialTextView areaTextView, timeTextView, stepCountTextView;
+    private TextView areaTextView, timeTextView, stepCountTextView;
     private boolean isDarkTheme = false;
     private long startTimeMillis, endTimeMillis;
     private boolean hasShownNotificationTip() {
@@ -206,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 统一使用系统 Toast 风格的小提示（与“清除历史记录”相同）
-    private void showPillMessage(String message, int iconRes, boolean longDuration) {
+    private void showPillMessage(String message, boolean longDuration) {
         android.widget.Toast.makeText(
                 this,
                 message,
@@ -215,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showLongerToast(String message) {
-        showPillMessage(message, R.mipmap.ic_launcher_round, true);
+        showPillMessage(message, true);
     }
 
     private void startTrackingServiceSafely() {
@@ -260,11 +252,24 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private boolean isRequestingForRecording = false; // Flag to distinguish request source
+
     private final ActivityResultLauncher<String[]> permissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
 
                 if (Boolean.TRUE.equals(result.get(Manifest.permission.ACCESS_FINE_LOCATION))) {
-                    startTrackingServiceSafely();startLocationUpdates();
+                    if (isRequestingForRecording) {
+                        startTrackingServiceSafely();
+                        startLocationUpdates();
+                    } else {
+                        // If just requesting for "Locate" button
+                        if (aMap != null) {
+                            aMap.setMyLocationEnabled(true);
+                        }
+                        showMessage("权限已获取，正在定位...");
+                        // Retry the zoom logic
+                        findViewById(R.id.zoomBtn).performClick();
+                    }
                 } else {
                     new com.google.android.material.dialog.MaterialAlertDialogBuilder(MainActivity.this)
                             .setTitle("定位权限说明")
@@ -277,7 +282,8 @@ public class MainActivity extends AppCompatActivity {
                         Boolean.TRUE.equals(result.get(Manifest.permission.POST_NOTIFICATIONS))) {
                     if (!hasShownNotificationTip()) {
                         markNotificationTipShown();
-                        showMessage("通知权限已授权");
+                        // Only show toast if specifically recording, or if it's the first time
+                        // showMessage("通知权限已授权"); // Optional: suppress if user feels it's spam
                     }
                 }
             });
@@ -297,18 +303,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MapsInitializer.updatePrivacyShow(this, true, true);
-        MapsInitializer.updatePrivacyAgree(this, true);
 
-        String userKey = getSharedPreferences("prefs", MODE_PRIVATE)
-                .getString("user_amap_key", null);
-        if (userKey != null && !userKey.trim().isEmpty()) {
+        // 已移至 MyApplication.onCreate 处理（合规检查与 Key 设置）
 
-            AMapLocationClient.setApiKey(userKey);
-        } else {
-
-            checkAmapKey();
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     "tracking_channel",
@@ -342,10 +339,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-        com.google.android.material.textview.MaterialTextView deviceInfoText = findViewById(R.id.deviceInfoText);
+        TextView deviceInfoText = findViewById(R.id.deviceInfoText);
         String deviceType = Build.MODEL;
         String systemVersion = Build.VERSION.RELEASE;
-        deviceInfoText.setText("设备：" + deviceType + " · Android " + systemVersion);
+        deviceInfoText.setText(getString(R.string.device_info_format, deviceType, systemVersion));
+        
+        // 增加长按手动设置 Key 的入口
+        deviceInfoText.setOnClickListener(v -> showMessage("长按此处可手动设置高德 Key"));
+        deviceInfoText.setOnLongClickListener(v -> {
+            showApiKeyInputDialog();
+            return true;
+        });
 
         // Initialize sensor manager and register for step counter sensor
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -353,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
         if (stepSensor != null) {
             sensorManager.registerListener(stepListener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
         } else {
-            showPillMessage("当前设备不支持步数传感器", R.mipmap.ic_launcher_round, true);
+            showPillMessage("当前设备不支持步数传感器", true);
         }
 
         // Initialize map view and other UI elements
@@ -404,6 +408,7 @@ public class MainActivity extends AppCompatActivity {
             stepCounter = 0;
             startTimeMillis = System.currentTimeMillis();
             permissionsRequestedFromUser = true;
+            isRequestingForRecording = true; // Set the flag when starting recording
 
             requestLocationPermission();
             triggerNotificationForActivation();
@@ -455,11 +460,43 @@ public class MainActivity extends AppCompatActivity {
 
         // Zoom button click listener
         findViewById(R.id.zoomBtn).setOnClickListener(v -> {
-            if (lastLatLng != null) {
-                aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastLatLng, 18));
+            // 1. Check if System Location Service is enabled
+            if (!isLocationEnabled()) {
+                showMessage("请开启系统定位服务");
+                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                return;
+            }
+
+            // 2. Check Permissions
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    showMessage("请先授予定位权限");
+                    requestLocationPermission();
+                    return;
+                }
+            }
+
+            // 3. Try to get the current location from the Map SDK (Blue Dot)
+            android.location.Location myLocation = aMap.getMyLocation();
+            if (myLocation != null) {
+                LatLng current = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+                aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 17));
                 showMessage("已定位到当前位置");
+                return; // Locate successful
+            }
+            
+            // 4. Fallback to recorded location
+            if (lastLatLng != null) {
+                aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastLatLng, 17));
+                showMessage("已定位到上次记录位置");
             } else {
-                showMessage("尚未获取定位，请先点击“开始记录坐标”并允许使用确切的位置信息");
+                showMessage("正在获取定位信息，请稍候...");
+                // Force a location refresh just in case
+                if (aMap != null) {
+                    aMap.setMyLocationEnabled(false); // Reset
+                    aMap.setMyLocationEnabled(true);
+                }
             }
         });
 
@@ -598,7 +635,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 float distance = Float.parseFloat(distanceStr);
                 if (distance <= 0 || distance > 14f) {
-                    showPillMessage("请输入 0 到 14km 之间的值", 0, true);
+                    showPillMessage("请输入 0 到 14km 之间的值", true);
                     return;
                 }
                 // 保存账号信息（支持多个账号，phone:password 按行存储）
@@ -789,7 +826,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showToast(String message) {
         new Handler(Looper.getMainLooper()).post(() ->
-                showPillMessage(message, R.mipmap.ic_launcher_round, false)
+                showPillMessage(message, false)
         );
     }
 
@@ -870,9 +907,7 @@ public class MainActivity extends AppCompatActivity {
 
                         runOnUiThread(() -> showToast("登录成功，正在上传刷步数据..."));
 
-                        // 直接传递 limitationsId 给 sendFakeRunData
-                        String limitationsId = "yourLimitationsId"; // 用您的实际 limitationsId 替换这里
-                        sendFakeRunData(token, id, schoolId, semesterId, limitationsId, distance);
+                        sendFakeRunData(token, id, schoolId, semesterId, distance);
 
                     } else {
                         String error = response.body().string();
@@ -901,43 +936,19 @@ public class MainActivity extends AppCompatActivity {
         return new String(decrypted, "UTF-8");
     }
 
-    private void checkAmapKey() {
-        try {
-
-            ApplicationInfo appInfo = getPackageManager()
-                    .getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-            String amapKey = appInfo.metaData.getString("com.amap.api.v2.apikey");
-
-            if (amapKey == null || amapKey.trim().isEmpty() || amapKey.equals("PLEASE_SET_YOUR_OWN_KEY")) {
-
-                String savedKey = getSharedPreferences("prefs", MODE_PRIVATE)
-                        .getString("user_amap_key", null);
-
-                if (savedKey == null || savedKey.trim().isEmpty()) {
-
-                    showApiKeyInputDialog();
-                } else {
-
-                    AMapLocationClient.setApiKey(savedKey);
-                }
-            } else {
-
-                AMapLocationClient.setApiKey(amapKey);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void showApiKeyInputDialog() {
 
         BottomSheetDialog dialog = new BottomSheetDialog(this);
-
-
         View view = getLayoutInflater().inflate(R.layout.dialog_input_apikey, null);
         EditText inputField = view.findViewById(R.id.editTextApiKey);
         Button saveBtn = view.findViewById(R.id.saveKeyButton);
-
+        
+        // 预填当前的 Key（如果有）
+        String currentKey = getSharedPreferences("prefs", MODE_PRIVATE).getString("user_amap_key", "");
+        if (!currentKey.isEmpty()) {
+            inputField.setText(currentKey);
+        }
 
         saveBtn.setOnClickListener(v -> {
             String userKey = inputField.getText().toString().trim();
@@ -960,16 +971,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         dialog.setContentView(view);
-        dialog.setCancelable(false);
         dialog.show();
     }
 
     private void restartApp() {
         Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
         if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            int mPendingIntentId = 123456;
+            android.app.PendingIntent mPendingIntent = android.app.PendingIntent.getActivity(
+                    this, mPendingIntentId, intent, android.app.PendingIntent.FLAG_CANCEL_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+            android.app.AlarmManager mgr = (android.app.AlarmManager) getSystemService(android.content.Context.ALARM_SERVICE);
+            // 100毫秒后重启应用
+            mgr.set(android.app.AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+            // 彻底杀死当前进程，强制 SDK 重新初始化
+            System.exit(0);
         }
     }
 
@@ -1124,7 +1140,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showMessage(String message) {
-        showPillMessage(message, R.mipmap.ic_launcher_round, false);
+        showPillMessage(message, false);
     }
 
     @Override
@@ -1169,7 +1185,7 @@ public class MainActivity extends AppCompatActivity {
                 // ✅ 统一使用 Snackbar 样式的 showMessage
                 showMessage("✅ 通知权限已授权");
             } else {
-                showPillMessage("未授权通知，可能看不到后台记录", R.mipmap.ic_launcher_round, true);
+                showPillMessage("未授权通知，可能看不到后台记录", true);
                 Intent intent = new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
                 intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, getPackageName());
                 startActivity(intent);
@@ -1185,12 +1201,12 @@ public class MainActivity extends AppCompatActivity {
             if (granted) {
                 if (permissionsRequestedFromUser) {
                     permissionsRequestedFromUser = false;
-                    // ... 启动逻辑保持不变 ...
-                    startLocationUpdates();
-                    showMessage("✅ 已获取权限，开始记录");
+                    // Retry starting the service now that permissions are granted
+                    startTrackingServiceSafely();
+                    showMessage("✅ 服务权限已获取，后台记录已开启");
                 }
             } else {
-                showPillMessage("权限不足，无法准确记录轨迹", R.mipmap.ic_launcher_round, true);
+                showPillMessage("权限不足，无法准确记录轨迹", true);
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                         .setTitle("权限说明")
                         .setMessage("轨迹记录需要后台定位权限，否则App切入后台后记录会中断。")
@@ -1248,7 +1264,6 @@ public class MainActivity extends AppCompatActivity {
         return aesEncrypt(jsonStr, key);
     }
     private void generateRoutineLine(JSONObject payload) throws JSONException {
-        JSONArray routineLine = new JSONArray();
         double[][] coords = new double[][]{
         {104.18877522786460,30.82946099175347},
         {104.18878603819594,30.82944443758445},
@@ -1319,7 +1334,7 @@ public class MainActivity extends AppCompatActivity {
         { 104.18916369520286, 30.829447932718853},
         { 104.1892949868891,  30.829517812605893},
         { 104.18935293007534, 30.82957988696563},
-        { 104.18939562311267, 30.82965012600323},
+        { 104.18939562311267, 30.82965012600323 },
         { 104.18947235549376, 30.829869993556706},
         { 104.18949435854174, 30.82991539712236},
         { 104.18963055996127, 30.83036973217385},
@@ -1410,32 +1425,95 @@ public class MainActivity extends AppCompatActivity {
         };
         Random rand = new Random();
 
-        // 1. 随机切片 (保留原坐标数据的5-24到57-70区间)
-        int start = rand.nextInt(20) + 5;  // 生成5-24之间的随机数
-        int end = Math.min(coords.length, rand.nextInt(14) + 57); // 生成57-70之间的随机数
+        // 获取目标里程（使用 payload 中的 totalMileage，默认为 0）
+        double targetKm = payload.optDouble("totalMileage", 0); 
+        // 容错：如果 totalMileage 没取到，尝试取 gpsMileage
+        if (targetKm <= 0) targetKm = payload.optDouble("gpsMileage", 0);
+        
+        double targetMeters = Math.max(0, targetKm * 1000.0);
 
-        // 2. 坐标微调 + 构建轨迹
-        for (int i = start; i < end; i++) {
-            double[] coord = coords[i];
+        // 1. 计算单圈长度
+        double loopMeters = 0;
+        for (int i = 0; i < coords.length; i++) {
+            double[] p1 = coords[i];
+            double[] p2 = coords[(i + 1) % coords.length];
+            loopMeters += calculateDistance(p1[1], p1[0], p2[1], p2[0]);
+        }
+        
+        if (loopMeters == 0) loopMeters = 400; // 防止除以0，给个默认值
 
-            // 经度微调 (±0.00001范围)
-            double lngOffset = (rand.nextDouble() * 2 - 1) * 0.00001 + 0.0001;
-            // 纬度微调 (±0.00001范围)
-            double latOffset = (rand.nextDouble() * 2 - 1) * 0.00001 + 0.0001;
+        // 2. 计算圈数和余量
+        int laps = (int) (targetMeters / loopMeters);
+        double remainMeters = targetMeters % loopMeters;
 
-            JSONObject point = new JSONObject();
-            point.put("latitude", Double.parseDouble(String.format("%.15f", coord[1] + latOffset))); // 纬度
-            point.put("longitude", Double.parseDouble(String.format("%.15f", coord[0] + lngOffset))); // 经度
-            routineLine.put(point);
+        JSONArray routineLine = new JSONArray();
+
+        // 3. 拼接整圈
+        for (int l = 0; l < laps; l++) {
+            for (double[] coord : coords) {
+                addJitterPoint(routineLine, coord, rand);
+            }
         }
 
-        // 3. 反转轨迹数组
-        JSONArray reversedLine = new JSONArray();
-        for (int i = routineLine.length() - 1; i >= 0; i--) {
-            reversedLine.put(routineLine.get(i));
+        // 4. 拼接余量部分
+        // 为了保证连续性，如果已经有圈数了，接着最后一个点跑；如果是第一圈，从头开始。
+        // 原逻辑是从头遍历
+        double currentDist = 0;
+        for (int i = 0; i < coords.length; i++) {
+            double[] p1 = coords[i];
+            double[] p2 = coords[(i + 1) % coords.length];
+
+            // 总是添加当前段的起点
+            addJitterPoint(routineLine, p1, rand);
+
+            double segDist = calculateDistance(p1[1], p1[0], p2[1], p2[0]);
+            
+            if (currentDist + segDist >= remainMeters) {
+                // 需要截断插值
+                double ratio = (remainMeters - currentDist) / segDist;
+                // 简单的线性插值
+                double endLat = p1[1] + (p2[1] - p1[1]) * ratio;
+                double endLng = p1[0] + (p2[0] - p1[0]) * ratio;
+                
+                addJitterPoint(routineLine, new double[]{endLng, endLat}, rand);
+                break; // 完成构建
+            }
+            
+            currentDist += segDist;
         }
-        payload.put("routineLine", reversedLine);
+
+        // 5. 同步更新 payload 字段
+        // 计算逻辑段数：整圈数 + (有余量算1段)
+        int totalPart = laps + (remainMeters > 5 ? 1 : 0); // 余量大于5米算一段
+        if (totalPart < 1) totalPart = 1;
+
+        payload.put("routineLine", routineLine);
+        payload.put("totalPart", totalPart);
+        payload.put("effectivePart", totalPart); // 同步更新有效段数
     }
+    private double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+        double R = 6378137.0;
+        double radLat1 = Math.toRadians(lat1);
+        double radLat2 = Math.toRadians(lat2);
+        double a = radLat1 - radLat2;
+        double b = Math.toRadians(lng1) - Math.toRadians(lng2);
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
+                Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+        return s * R;
+    }
+
+    private void addJitterPoint(JSONArray line, double[] coord, Random rand) throws JSONException {
+        // 经度微调 (±0.00001范围)
+        double lngOffset = (rand.nextDouble() * 2 - 1) * 0.00001 + 0.0001;
+        // 纬度微调 (±0.00001范围)
+        double latOffset = (rand.nextDouble() * 2 - 1) * 0.00001 + 0.0001;
+
+        JSONObject point = new JSONObject();
+        point.put("latitude", Double.parseDouble(String.format("%.15f", coord[1] + latOffset)));
+        point.put("longitude", Double.parseDouble(String.format("%.15f", coord[0] + lngOffset)));
+        line.put(point);
+    }
+
     private String getUserAgent() {
         String deviceType = Build.MODEL;
         String systemVersion = Build.VERSION.RELEASE;
@@ -1443,7 +1521,7 @@ public class MainActivity extends AppCompatActivity {
                 ") AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
     }
 
-    public void sendFakeRunData(String token, String id, String schoolId, String semesterId, String limitationsId,double distance) {
+    public void sendFakeRunData(String token, String id, String schoolId, String semesterId, double distance) {
         Log.d("LeJian", "📦 已进入 sendFakeRunData()");
         new Thread(() -> {
             try {
@@ -1466,10 +1544,12 @@ public class MainActivity extends AppCompatActivity {
                 String systemVersion = Build.VERSION.RELEASE;
 
                 JSONObject payload = new JSONObject();
-                payload.put("gpsMileage", fixPrecision(distance + randNum, 6));
+                double finalDist = fixPrecision(distance + randNum);
+                payload.put("gpsMileage", finalDist);
                 payload.put("effectiveMileage", 14);
-                payload.put("totalMileage", fixPrecision(distance + randNum, 6));
-                payload.put("limitationsGoalsSexInfoId",distance);
+                payload.put("totalMileage", finalDist);
+                // payload.put("limitationsGoalsSexInfoId",distance); // 数据异常：原代码将 distance 赋给了 ID 字段，疑似逻辑错误，先保留但注释说明
+                payload.put("limitationsGoalsSexInfoId", distance); 
                 payload.put("paceNumber", paceNumber);
                 payload.put("calorie", calorie);
                 payload.put("avePace", avePace);
@@ -1602,7 +1682,7 @@ public class MainActivity extends AppCompatActivity {
         showToast("获取学期信息失败，无法上传里程");
         return "";
     }
-    private double fixPrecision(double value, int digits) {
-        return Double.parseDouble(String.format("%." + digits + "f", value));
+    private double fixPrecision(double value) {
+        return Double.parseDouble(String.format(Locale.US, "%.6f", value));
     }
 }
