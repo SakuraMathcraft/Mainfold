@@ -212,7 +212,7 @@
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/areaResult"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -242,7 +242,7 @@
                                 android:text="开始 / 结束 / 用时"
                                 android:textAppearance="?attr/textAppearanceLabelSmall" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/timeResult"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -271,7 +271,7 @@
                                 android:text="计步数 (系统)"
                                 android:textAppearance="?attr/textAppearanceLabelSmall" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/stepCountText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -293,7 +293,7 @@
                                 android:text="真实步数"
                                 android:textAppearance="?attr/textAppearanceLabelSmall" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/realStepCountText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

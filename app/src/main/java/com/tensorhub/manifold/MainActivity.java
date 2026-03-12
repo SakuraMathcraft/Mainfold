@@ -57,6 +57,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.android.datatransport.Transform;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -392,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
         // Start button click listener
         findViewById(R.id.startBtn).setOnClickListener(v -> {
             if (!isLocationEnabled()) {
-                showMessage("请开启定位服务后重试");
+                showMessage("��开启定位服务后重试");
                 startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                 return;
             }
@@ -640,7 +641,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // 保存账号信息（支持多个账号，phone:password 按行存储）
                 saveLeJianAccount(phone, password);
-                loginWithOkHttp(phone, password, distance);
+                
+                // 切换为针对“体适能APP”的登录与上传逻辑
+                // loginWithOkHttp(phone, password, distance); // 原乐健逻辑
+                loginTiShiNeng(phone, password, distance); // 新增的体适能逻辑占位符
+                
                 dialog.dismiss();
             } catch (Exception e) {
                 showToast("无效的里程输入");
@@ -830,6 +835,143 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * 适配指南：针对“体适能APP”的登录逻辑占位符
+     *
+     * 适配新APP通常涉及以下步骤（需要自行抓包分析）：
+     * 1. 抓取“登录”接口：
+     *    - 确定URL（如 https://api.tishineng.com/login）
+     *    - 确定请求方式（POST/GET）
+     *    - 分析请求Header（关键字段：User-Agent, Authorization, Custom-Sign等）
+     *    - 分析请求Body（是否加密？参数名是 username 还是 phone？）
+     *    - 分析响应：获取 Token 或 Cookie，以及 UserID
+     *
+     * 2. 抓取“上传跑步/成绩”接口：
+     *    - 确定URL
+     *    - 分析数据结构：是上传轨迹点数组（JSON/GPX），还是仅上传最终里程数值？
+     *    - 分析签名算法：通常会有 sign = MD5(param1 + param2 + salt) 这样的校验
+     */
+    public void loginTiShiNeng(String phone, String password, float distance) {
+        new Thread(() -> {
+            try {
+                // 检查 .so 库是否就绪（通过尝试加载 Transform 类触发）
+                try {
+                    Transform.INSTANCE.toString();
+                } catch (Throwable t) {
+                    runOnUiThread(() -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                            .setTitle("缺少核心组件")
+                            .setMessage("未检测到 libtsnsecret.so 库，无法进行签名加密。\n\n" +
+                                    "请从体适能APK中提取 libtsnsecret.so (arm64-v8a) \n" +
+                                    "并放入 app/src/main/jniLibs/arm64-v8a/ 目录下。")
+                            .setPositiveButton("我知道了", null)
+                            .show());
+                    return;
+                }
+
+                // 构造登录 JSON
+                JSONObject loginPayload = new JSONObject();
+                loginPayload.put("username", phone);
+                loginPayload.put("password", password); // 注意：这里可能需要 MD5 或原样发送，需抓包确认
+                // loginPayload.put("grant_type", "password"); // OAuth 常见参数，需抓包确认
+                // loginPayload.put("scope", "all");
+
+                // 发送登录请求 (URL 需抓包确认，这里是示例占位)
+                // Request request = ...
+                // Response response = ...
+
+                // 模拟登录成功获取 Token (仅作演示，实际需解析 response)
+                Log.d("TiShiNeng", "模拟登录流程...");
+                String mockToken = "mock_token_" + System.currentTimeMillis();
+
+                // 实际使用时，请替换为真实 Token
+                // String token = responseJson.getString("access_token");
+
+                runOnUiThread(() -> showToast("体适能登录成功(模拟)，准备加密上传..."));
+
+                uploadTiShiNengData(mockToken, distance);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> showToast("体适能登录异常：" + e.getMessage()));
+            }
+        }).start();
+    }
+
+    /**
+     * 适配指南：针对“体适能APP”的数据上传逻辑占位符
+     */
+    public void uploadTiShiNengData(String token, float distance) {
+        Log.d("TiShiNeng", "准备上传数据，距离：" + distance + "km");
+        new Thread(() -> {
+            try {
+                // 1. 构造原始数据 JSON
+                // 参考 FuckTSN Hook 到的结构，通常需要包含轨迹点
+                JSONObject data = new JSONObject();
+                data.put("sportType", 1); // 跑步
+                
+                // 生成轨迹点与计算数据 (复用LeJian的逻辑，因为物理运动是一样的)
+                // 注意：体适能可能有特定的字段名，需抓包确认。这里演示通用结构。
+                double speed = 500.0; // 配速
+                int keepTime = (int)(distance * speed); 
+                
+                data.put("sportTime", keepTime);
+                data.put("sportRange", distance * 1000); // meters
+                data.put("begintime", System.currentTimeMillis() - keepTime * 1000);
+                data.put("endtime", System.currentTimeMillis());
+                data.put("speed",  distance * 1000.0 / keepTime);
+                
+                // 生成轨迹 (Important: TiShiNeng likely validates this)
+                // data.put("trajectory", generateEvaluatedTrajectory(distance)); // 需实现
+                
+                String jsonRaw = data.toString();
+                String timestamp = String.valueOf(System.currentTimeMillis());
+
+                // 2. 调用核心 native 方法进行加密 (Transform.s)
+                // s 方法返回数组：[0]=解密key, [1]=加密后的data
+                String[] encryptedResult = Transform.INSTANCE.s(
+                        getApplicationContext(),
+                        token,
+                        timestamp,
+                        jsonRaw
+                );
+
+                if (encryptedResult == null || encryptedResult.length < 2) {
+                    throw new RuntimeException("Native加密失败，返回为空");
+                }
+
+                String key = encryptedResult[0]; // 用于解密的 Key（由服务器使用或客户端解密响应）
+                String encryptedData = encryptedResult[1]; // Body 中实际传输的密文
+
+                // 3. 生成签名 (Transform.v)
+                String sign = Transform.INSTANCE.v(getApplicationContext(), token, timestamp);
+
+                Log.d("TiShiNeng", "加密成功！\nKey: " + key + "\nSign: " + sign + "\nData: " + encryptedData);
+
+                // 4. 发送上传请求 (URL 需抓包确认)
+                /*
+                Request request = new Request.Builder()
+                        .url("https://api.tishineng.com/v1/upload") // 示例 URL
+                        .header("Authorization", "Bearer " + token)
+                        .header("Sign", sign)
+                        .header("Timestamp", timestamp)
+                        .post(RequestBody.create(MediaType.parse("application/json"), encryptedData))
+                        .build();
+
+                // 执行请求...
+                */
+
+                Thread.sleep(1000);
+                runOnUiThread(() -> showLongerToast("🎉 本地加密签名成功！(模拟上传) \n请抓包获取真实 URL 完成最后一步。"));
+
+            } catch (UnsatisfiedLinkError e) {
+                runOnUiThread(() -> showToast("错误：找不到 libtsnsecret.so，请确保库文件已放入 jniLibs"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> showToast("上传适配异常：" + e.getMessage()));
+            }
+        }).start();
+    }
+
     public void loginWithOkHttp(String phone, String password, float distance) {
         new Thread(() -> {
             try {
@@ -901,7 +1043,7 @@ public class MainActivity extends AppCompatActivity {
                         semesterId = getSemesterId(token);
 
                         if (token.isEmpty() || id == null || schoolId == null || semesterId == null) {
-                            runOnUiThread(() -> showToast("登录成功，但缺少必要参数，上传取消"));
+                            runOnUiThread(() -> showToast("登录成功，但缺少��要参数，上传取消"));
                             return;
                         }
 
@@ -1182,7 +1324,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == 999) { // 通知权限回调
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // ✅ 统一使用 Snackbar 样式的 showMessage
                 showMessage("✅ 通知权限已授权");
             } else {
                 showPillMessage("未授权通知，可能看不到后台记录", true);
@@ -1206,7 +1347,7 @@ public class MainActivity extends AppCompatActivity {
                     showMessage("✅ 服务权限已获取，后台记录已开启");
                 }
             } else {
-                showPillMessage("权限不足，无法准确记录轨迹", true);
+                showPillMessage("权限不足，无法准确记录���迹", true);
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                         .setTitle("权限说明")
                         .setMessage("轨迹记录需要后台定位权限，否则App切入后台后记录会中断。")
